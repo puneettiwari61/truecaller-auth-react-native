@@ -27,6 +27,8 @@ import com.truecaller.android.sdk.clients.VerificationCallback;
 import com.truecaller.android.sdk.clients.VerificationDataBundle;
 import static com.truecaller.android.sdk.clients.VerificationDataBundle.KEY_OTP;
 import android.graphics.Color;
+import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
+
 
 public class TruecallerAuthModule extends ReactContextBaseJavaModule {
 
@@ -114,7 +116,17 @@ public void onFailureProfileShared(@NonNull final TrueError trueError) {
 @Override
 public void onVerificationRequired(TrueError trueError) {
 //The statement below can be ignored incase of One-tap flow integration
-  TruecallerSDK.getInstance().requestVerification("IN", "PHONE-NUMBER-STRING", apiCallback,(FragmentActivity) getCurrentActivity());
+  // TruecallerSDK.getInstance().requestVerification("IN", "PHONE-NUMBER-STRING", apiCallback,(FragmentActivity) getCurrentActivity());
+
+  runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                TruecallerSDK.getInstance().requestVerification("IN", "PHONE-NUMBER-STRING", apiCallback, (FragmentActivity) getCurrentActivity() );
+
+            }
+        });
+
   }
 };
 
@@ -161,7 +173,8 @@ TruecallerAuthModule(ReactApplicationContext reactContext) {
     .termsOfServiceUrl("<YOUR-TERMS-OF-SERVICE-URL>")
     .footerType(TruecallerSdkScope.FOOTER_TYPE_NONE)
     .consentTitleOption(TruecallerSdkScope.SDK_CONSENT_TITLE_LOG_IN)
-    .sdkOptions(TruecallerSdkScope.SDK_OPTION_WITHOUT_OTP)
+    // .sdkOptions(TruecallerSdkScope.SDK_OPTION_WITHOUT_OTP)
+    .sdkOptions(TruecallerSdkScope.SDK_OPTION_WITH_OTP)
     .build();
   TruecallerSDK.init(trueScope);
  reactContext.addActivityEventListener(mActivityEventListener);  
@@ -183,7 +196,10 @@ public void authenticate(Promise promise) {
     try {
          this.promise = promise;
            if (TruecallerSDK.getInstance() != null) {
-                TruecallerSDK.getInstance().getUserProfile((FragmentActivity) getCurrentActivity());
+                // TruecallerSDK.getInstance().getUserProfile((FragmentActivity) getCurrentActivity());
+              initiate();
+              // Verify("+918118840567");
+
             } else {
                   WritableMap map = Arguments.createMap();
                   map.putString("error", "ERROR_TYPE_NOT_SUPPORTED");
@@ -194,6 +210,21 @@ public void authenticate(Promise promise) {
            }
        }
 
+
+
+    @ReactMethod
+    public void Verify(String PhoneNumber){
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                TruecallerSDK.getInstance().requestVerification("IN", PhoneNumber, apiCallback, (FragmentActivity) getCurrentActivity() );
+
+            }
+        });
+    }
+
  private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent intent) {
@@ -202,5 +233,24 @@ public void authenticate(Promise promise) {
          TruecallerSDK.getInstance().onActivityResultObtained((FragmentActivity)activity, resultCode, intent);
         }
       }
+//       @Override
+//     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+//         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+// }
     }; 
+
+@ReactMethod
+    private void initiate(){
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.e("Authenticate: ","Initiate is working fine ");
+               
+                TruecallerSDK.getInstance().getUserProfile((FragmentActivity) getCurrentActivity());
+
+            }
+        });
+    }
+
 }

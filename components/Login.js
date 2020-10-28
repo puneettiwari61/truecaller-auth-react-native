@@ -15,15 +15,18 @@ export default class Login extends Component {
   };
 
   componentDidMount() {
-    console.log(TruecallerAuthModule,"authmodule")
+    console.log(TruecallerAuthModule, 'authmodule');
+    console.log(NativeModules, 'NativeModules');
   }
-  
 
   handleAuth = () => {
-    TruecallerAuthModule.authenticate().then((res) => {
-      this.setState({user: res});
-      console.log(res, 'from auth');
-    }).catch(err => console.log(err,"err"))
+    // TruecallerAuthModule.authenticate()
+    //   .then((res) => {
+    //     // this.setState({user: res});
+    //     console.log(res, 'from auth');
+    //   })
+    //   .catch((err) => console.log(err, 'err'));
+    TruecallerAuthModule.Verify('+918118840567');
   };
 
   render() {
