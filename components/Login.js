@@ -20,13 +20,14 @@ export default class Login extends Component {
   }
 
   handleAuth = () => {
+    console.log('auth clicked');
     // TruecallerAuthModule.authenticate()
     //   .then((res) => {
-    //     // this.setState({user: res});
+    //     this.setState({user: res});
     //     console.log(res, 'from auth');
     //   })
     //   .catch((err) => console.log(err, 'err'));
-    TruecallerAuthModule.Verify('+918118840567');
+    TruecallerAuthModule.Verify('9150435718');
   };
 
   render() {

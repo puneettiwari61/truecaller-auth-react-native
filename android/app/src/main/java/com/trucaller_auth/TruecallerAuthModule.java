@@ -137,25 +137,31 @@ final VerificationCallback apiCallback = new VerificationCallback() {
     @Override
 public void onRequestSuccess(int requestCode, @Nullable VerificationDataBundle extras) {
 if (requestCode == VerificationCallback.TYPE_MISSED_CALL_INITIATED) {
+  System.out.println("Missed call initialized");
   }
 if (requestCode == VerificationCallback.TYPE_MISSED_CALL_RECEIVED) {
+    System.out.println("Missed call Received");
     TrueProfile profile = new TrueProfile.Builder("USER-FIRST-NAME","USER-LAST-NAME").build();
     TruecallerSDK.getInstance().verifyMissedCall(profile, apiCallback);
   }
 if (requestCode == VerificationCallback.TYPE_OTP_INITIATED) {
+  System.out.println("OTP initialized");
   }
 if (requestCode == VerificationCallback.TYPE_OTP_RECEIVED) {
+  System.out.println("Missed call Received");
     TrueProfile profile = new TrueProfile.Builder("USER-FIRST-NAME","USER-LAST-NAME").build();
     TruecallerSDK.getInstance().verifyOtp(profile, "OTP-ENTERED-BY-THE-USER", apiCallback);
   }
   if (requestCode == VerificationCallback.TYPE_VERIFICATION_COMPLETE) {
  }
   if (requestCode == VerificationCallback.TYPE_PROFILE_VERIFIED_BEFORE) {
+      System.out.println("Profile verifies before");
   }
 }
 @Override
 public void onRequestFailure(final int requestCode, @NonNull final TrueException e) {
   //Write the Exception Part
+    System.out.println("Error from exception");
     }  
 };
 
@@ -196,10 +202,9 @@ public void authenticate(Promise promise) {
     try {
          this.promise = promise;
            if (TruecallerSDK.getInstance() != null) {
-                // TruecallerSDK.getInstance().getUserProfile((FragmentActivity) getCurrentActivity());
-              initiate();
-              // Verify("+918118840567");
-
+                TruecallerSDK.getInstance().getUserProfile((FragmentActivity) getCurrentActivity());
+                
+                 System.out.println("truecaller available ?  "+TruecallerSDK.getInstance().isUsable());
             } else {
                   WritableMap map = Arguments.createMap();
                   map.putString("error", "ERROR_TYPE_NOT_SUPPORTED");
@@ -218,6 +223,7 @@ public void authenticate(Promise promise) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+            System.out.println(PhoneNumber);
 
                 TruecallerSDK.getInstance().requestVerification("IN", PhoneNumber, apiCallback, (FragmentActivity) getCurrentActivity() );
 
