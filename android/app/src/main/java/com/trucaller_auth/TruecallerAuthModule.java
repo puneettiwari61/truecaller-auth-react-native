@@ -33,6 +33,8 @@ import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
 public class TruecallerAuthModule extends ReactContextBaseJavaModule {
 
 private Promise promise = null;
+private  ReactContext reactContext;
+
 
 private final ITrueCallback sdkCallback = new ITrueCallback() {
   @Override
@@ -130,6 +132,24 @@ public void onVerificationRequired(TrueError trueError) {
   }
 };
 
+ private void sendEvent(ReactContext reactContext, String eventName, @Nullable WritableMap params) {
+     
+    reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+  
+}
+
+
+private void onConnected(String session) {
+  // Create map for params
+      WritableMap params = Arguments.createMap();
+  // Put data to map
+  params.putString("event", session);
+  // Get EventEmitter from context and send event thanks to it
+  this.reactContext
+    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+    .emit("onSessionConnect", params);
+}
+
 
 //Callback below can be ignored incase of One-tap only integration 
 
@@ -137,9 +157,11 @@ final VerificationCallback apiCallback = new VerificationCallback() {
     @Override
 public void onRequestSuccess(int requestCode, @Nullable VerificationDataBundle extras) {
 if (requestCode == VerificationCallback.TYPE_MISSED_CALL_INITIATED) {
+  onConnected("Missed call initialized");
   System.out.println("Missed call initialized");
   }
 if (requestCode == VerificationCallback.TYPE_MISSED_CALL_RECEIVED) {
+    onConnected("Missed call Received");
     System.out.println("Missed call Received");
     TrueProfile profile = new TrueProfile.Builder("USER-FIRST-NAME","USER-LAST-NAME").build();
     TruecallerSDK.getInstance().verifyMissedCall(profile, apiCallback);
@@ -148,25 +170,32 @@ if (requestCode == VerificationCallback.TYPE_OTP_INITIATED) {
   System.out.println("OTP initialized");
   }
 if (requestCode == VerificationCallback.TYPE_OTP_RECEIVED) {
-  System.out.println("Missed call Received");
+  System.out.println("OTP Received");
     TrueProfile profile = new TrueProfile.Builder("USER-FIRST-NAME","USER-LAST-NAME").build();
     TruecallerSDK.getInstance().verifyOtp(profile, "OTP-ENTERED-BY-THE-USER", apiCallback);
   }
   if (requestCode == VerificationCallback.TYPE_VERIFICATION_COMPLETE) {
+      onConnected("Verification complete");
+    System.out.println("Verification complete");
+          Log.e("FirstName",extras.getProfile().firstName);
+
  }
   if (requestCode == VerificationCallback.TYPE_PROFILE_VERIFIED_BEFORE) {
-      System.out.println("Profile verifies before");
+      Log.e("FirstName",extras.getProfile().firstName);
   }
 }
 @Override
 public void onRequestFailure(final int requestCode, @NonNull final TrueException e) {
   //Write the Exception Part
     System.out.println("Error from exception");
+          // Log.e("Error from exception", e);
     }  
+
 };
 
 TruecallerAuthModule(ReactApplicationContext reactContext) {
    super(reactContext);
+   this.reactContext = reactContext;
   TruecallerSdkScope trueScope = new TruecallerSdkScope.Builder(reactContext, sdkCallback)
      .consentMode(TruecallerSdkScope.CONSENT_MODE_BOTTOMSHEET)
     .buttonColor(Color.parseColor("#000000"))
@@ -230,6 +259,15 @@ public void authenticate(Promise promise) {
             }
         });
     }
+
+    
+
+    @ReactMethod
+    public void verifyComplete(String firstName,String lastName){
+    TrueProfile profile = new TrueProfile.Builder(firstName, lastName).build();
+    TruecallerSDK.getInstance().verifyMissedCall(profile, apiCallback);
+}
+
 
  private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
     @Override

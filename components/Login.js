@@ -5,6 +5,7 @@ import {
   View,
   NativeModules,
   TouchableOpacity,
+  DeviceEventEmitter,
 } from 'react-native';
 
 const {TruecallerAuthModule} = NativeModules;
@@ -17,6 +18,31 @@ export default class Login extends Component {
   componentDidMount() {
     console.log(TruecallerAuthModule, 'authmodule');
     console.log(NativeModules, 'NativeModules');
+
+    // TRUECALLER.initializeClient();
+
+    // TRUECALLER.on(TRUECALLER_EVENT.TrueProfileResponse, (profile) => {
+    //   console.log('Truecaller profile data: ', profile);
+    //   // add other logic here related to logi)n/sign-up as per your use-case.
+    // });
+
+    // TRUECALLER.on(TRUECALLER_EVENT.TrueProfileResponseError, (error) => {
+    //   console.log('User rejected the truecaller consent request! ', error);
+    // });
+
+    const onSessionConnect = (event) => {
+      event = event.event;
+      if (event === 'Missed call Received') {
+        console.log('inside if missed call received');
+        TruecallerAuthModule.verifyComplete('Puneet', 'Tiwari');
+      }
+      if (event === 'Verification complete') {
+        TruecallerAuthModule.verifyComplete('Puneet', 'Tiwari');
+        console.log('inside if missed call received');
+      }
+    };
+
+    DeviceEventEmitter.addListener('onSessionConnect', onSessionConnect);
   }
 
   handleAuth = () => {
@@ -27,7 +53,7 @@ export default class Login extends Component {
     //     console.log(res, 'from auth');
     //   })
     //   .catch((err) => console.log(err, 'err'));
-    TruecallerAuthModule.Verify('9150435718');
+    TruecallerAuthModule.Verify('+919150435718');
   };
 
   render() {
@@ -41,7 +67,7 @@ export default class Login extends Component {
             <Text>
               Name: {this.state.user.firstName + this.state.user.lastName}
             </Text>
-            <Text>Email: {this.state.user.email}</Text>
+            <Text>Email: {this.state.user.email || 'hey my e mail'}</Text>
           </View>
         )}
       </View>
